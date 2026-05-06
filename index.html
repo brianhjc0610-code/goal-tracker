@@ -57,7 +57,49 @@ body::after{content:'';position:fixed;bottom:-10%;right:5%;width:35%;height:35%;
 .sec-t::after{content:'';flex:1;height:1px;background:var(--bdr)}
 
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
-@media(max-width:640px){.cards{grid-template-columns:1fr}}
+/* Mobile font size boost */
+@media(max-width:640px){
+  body{font-size:16px}
+  .hero-yr{font-size:12px}
+  .hero-t{font-size:22px}
+  .hero-sub{font-size:14px}
+  .ring-info{font-size:14px}
+  .sec-t{font-size:14px}
+  .gc-name{font-size:16px}
+  .gc-detail{font-size:14px;max-width:200px}
+  .gc-num{font-size:22px}
+  .gc-target{font-size:12px}
+  .gc-trend{font-size:13px}
+  .gc-foot{font-size:13px}
+  .dm-lbl{font-size:11px}
+  .dm-val{font-size:18px}
+  .dm-val .u{font-size:12px}
+  .st-v{font-size:22px}
+  .st-l{font-size:12px}
+  .sync-bar{font-size:12px}
+  .sync-bar button{font-size:12px}
+  .nav-btn{font-size:12px}
+  .nav-btn span{font-size:20px}
+  .det-back{font-size:14px;padding:8px 16px}
+  .det-title{font-size:20px}
+  .det-sub{font-size:13px}
+  .panel-t{font-size:15px}
+  .ip-label{font-size:13px}
+  .ip-input{font-size:16px}
+  .ip-btn{font-size:14px;padding:10px 20px}
+  .ta{font-size:16px}
+  .dtable th{font-size:13px}
+  .dtable td{font-size:14px}
+  .book-title{font-size:16px}
+  .book-meta{font-size:13px}
+  .contact-name{font-size:16px}
+  .contact-meta{font-size:13px}
+  .proj-name{font-size:17px}
+  .proj-meta{font-size:13px}
+  .hist-wk{font-size:13px}
+  .hist-txt{font-size:14px}
+  .toast{font-size:14px}
+}
 
 .gcard{background:var(--surf);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px 18px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
 .gcard:hover{background:var(--surf2);border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
@@ -1291,6 +1333,40 @@ function fileImp(e){const f=e.target.files[0];if(!f)return;const r=new FileReade
 function textImp(){const t=document.getElementById('impTA').value.trim();if(!t){showR('impR2','请粘贴',false);return}doImp(t,'impR2')}
 function doImp(json,rid){try{const p=JSON.parse(json);let d=(p.version&&p.data)?p.data:(p.entries||p.metrics||p.books)?p:null;if(!d)throw new Error('无法识别');S=ensureState(d);save();renderDash();if(supaUrl)syncPush();showR(rid,'导入成功',true);toast('✅ 已导入')}catch(e){showR(rid,'失败：'+e.message,false)}}
 function clearAll(){myConfirm('确定清除所有数据？此操作不可撤销！',()=>{myConfirm('再次确认：所有进度、记录、书籍、联系人、项目都将被清除。',()=>{S=ensureState(defaultState());save();if(supaUrl)syncPush();goPage('dash');toast('🗑️ 已清除')},'最终确认')},'危险操作')}
+
+// ══════════════════════════════════════
+// SWIPE GESTURE (左滑返回)
+// ══════════════════════════════════════
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive: true});
+
+document.addEventListener('touchend', e => {
+  if(!e.changedTouches.length) return;
+  const touchEndX = e.changedTouches[0].clientX;
+  const touchEndY = e.changedTouches[0].clientY;
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  // 左滑检测：横向滑动>100px && 纵向<80px（避免干扰滚动）&& 向右滑
+  if(deltaX > 100 && Math.abs(deltaY) < 80 && touchStartX < 80) {
+    // 只在详情页时才返回
+    const detailPage = document.getElementById('pg-detail');
+    const booksPage = document.getElementById('pg-books');
+    const settingsPage = document.getElementById('pg-settings');
+    
+    if(detailPage && detailPage.classList.contains('on')) {
+      goPage('dash');
+    } else if(booksPage && booksPage.classList.contains('on')) {
+      goPage('dash');
+    } else if(settingsPage && settingsPage.classList.contains('on')) {
+      goPage('dash');
+    }
+  }
+}, {passive: true});
 
 // ══════════════════════════════════════
 // LIFE TICKER (从 1995-06-10 00:00:00 开始)
